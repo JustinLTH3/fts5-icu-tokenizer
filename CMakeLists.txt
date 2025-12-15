@@ -13,6 +13,12 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# --- API Version Selection ---
+# Define a variable to select between FTS5 API versions
+# API_VERSION can be "v1" (legacy) or "v2" (default/current)
+set(API_VERSION "v2" CACHE STRING "The FTS5 API version to build (v1 or v2)")
+set_property(CACHE API_VERSION PROPERTY STRINGS "v1" "v2")
+
 # --- Dynamic Locale Configuration ---
 
 # Define a variable for the locale, which can be set from the cmake command line.
@@ -44,8 +50,18 @@ else()
   set(C_INIT_SUFFIX_NO_UNDERSCORE "") # Pass an empty suffix for the default case
 endif()
 
+# Adjust the library name based on API version
+if(API_VERSION STREQUAL "v1")
+  set(API_SUFFIX "_legacy")
+  set(FULL_LIB_SUFFIX "${LIB_SUFFIX}${API_SUFFIX}")
+else()
+  set(API_SUFFIX "")
+  set(FULL_LIB_SUFFIX "${LIB_SUFFIX}")
+endif()
+
 message(STATUS "Building tokenizer for locale: '${LOCALE}'")
-message(STATUS "Library name will be: fts5_icu${LIB_SUFFIX}")
+message(STATUS "FTS5 API Version: '${API_VERSION}'")
+message(STATUS "Library name will be: fts5_icu${FULL_LIB_SUFFIX}")
 message(STATUS "Registered FTS5 tokenizer name will be: '${TOKENIZER_NAME}'")
 
 # Store locale-specific definitions to be applied after target creation
@@ -110,11 +126,20 @@ endif()
 
 # --- Configure the Library ---
 
-# Create the shared library from the source file.
-add_library(fts5_icu SHARED src/fts5_icu.c)
+# Select source files based on API version
+if(API_VERSION STREQUAL "v1")
+  set(SRC_FILE "src/fts5_icu_legacy.c")
+  set(HEADER_FILE "src/fts5_icu_legacy.h")
+else()
+  set(SRC_FILE "src/fts5_icu.c")
+  set(HEADER_FILE "src/fts5_icu.h")
+endif()
+
+# Create the shared library from the appropriate source file.
+add_library(fts5_icu SHARED ${SRC_FILE})
 
 # Set the dynamic output name for the library file.
-set_target_properties(fts5_icu PROPERTIES OUTPUT_NAME "fts5_icu${LIB_SUFFIX}")
+set_target_properties(fts5_icu PROPERTIES OUTPUT_NAME "fts5_icu${FULL_LIB_SUFFIX}")
 
 # Pass the locale, tokenizer name, and init function suffix to the C code.
 # The escaped quotes are important for passing string values.
@@ -124,6 +149,7 @@ target_compile_definitions(fts5_icu PRIVATE
   "TOKENIZER_NAME=\"${TOKENIZER_NAME}\""
   "INIT_LOCALE_SUFFIX=${C_INIT_SUFFIX}"
   "C_INIT_SUFFIX_NO_UNDERSCORE=${C_INIT_SUFFIX_NO_UNDERSCORE}"
+  "API_VERSION_${API_VERSION}"  # Define macro indicating which API version we're building
 )
 
 # Define locale-specific macros for compile-time selection
@@ -167,7 +193,7 @@ endif()
 
 # --- Test Programs ---
 
-# Add test programs
+# Add test programs (these don't change based on API version)
 add_executable(test_transliterator src/test_transliterator.c)
 target_link_libraries(test_transliterator PRIVATE ICU::i18n ICU::uc)
 
