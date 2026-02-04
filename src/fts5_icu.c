@@ -19,7 +19,7 @@
 
 // Define the fts5_api pointer before use - this must come after sqlite3ext.h is
 // included
-SQLITE_EXTENSION_INIT1
+//SQLITE_EXTENSION_INIT1
 
 // Helper function to get the FTS5 API pointer from the database connection.
 static fts5_api* fts5_api_from_db(sqlite3* db) {
