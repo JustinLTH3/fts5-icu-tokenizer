@@ -561,7 +561,7 @@ int PASTE(sqlite3_ftsicu, INIT_LOCALE_SUFFIX_FOR_FUNCTION, _init)(
   char **pzErrMsg,
   const sqlite3_api_routines *pApi
 ){
-    SQLITE_EXTENSION_INIT2(pApi);
+    //SQLITE_EXTENSION_INIT2(pApi);
     fts5_api* pFts5Api = fts5_api_from_db(db);
     if (!pFts5Api) {
         *pzErrMsg = sqlite3_mprintf("Failed to get FTS5 API");

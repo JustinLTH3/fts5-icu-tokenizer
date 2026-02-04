@@ -17,7 +17,7 @@
 
 // SQLite headers
 #include "sqlite3.h"
-#include "sqlite3ext.h"  // Required for SQLITE_EXTENSION_INIT2
+//#include "sqlite3ext.h"  // Required for SQLITE_EXTENSION_INIT2
 
 // ICU headers
 #include <unicode/ubrk.h>
